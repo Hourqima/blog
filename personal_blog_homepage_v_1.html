@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Qixiao Yuan | Personal Blog</title>
+  <meta name="description" content="Qixiao Yuan 的个人主页与博客。" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --text: #1f2430;
+      --muted: #667085;
+      --line: #e7eaf3;
+      --accent: #3b82f6;
+      --accent-soft: #dbeafe;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      --max-width: 980px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: linear-gradient(180deg, #f8f9fd 0%, #eef2ff 100%);
+      color: var(--text);
+      line-height: 1.7;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+    .container { width: min(var(--max-width), calc(100% - 32px)); margin: 0 auto; }
+
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(10px);
+      background: rgba(246, 247, 251, 0.75);
+      border-bottom: 1px solid rgba(231, 234, 243, 0.8);
+    }
+    .nav-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 0;
+    }
+    .brand { font-size: 1rem; font-weight: 700; letter-spacing: 0.02em; }
+    .nav-links { display: flex; gap: 18px; color: var(--muted); font-size: 0.95rem; }
+    .nav-links a:hover { color: var(--accent); }
+
+    .hero { padding: 72px 0 40px; }
+    .hero-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      padding: 36px;
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 32px;
+      align-items: center;
+    }
+    .avatar-wrap { display: flex; justify-content: center; align-items: center; }
+    .avatar {
+      width: 200px;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 50%;
+      border: 6px solid #fff;
+      box-shadow: 0 12px 30px rgba(59, 130, 246, 0.18);
+      background: #e5e7eb;
+    }
+    .eyebrow {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 14px;
+    }
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      line-height: 1.15;
+    }
+    .subtitle { margin: 0; font-size: 1.08rem; color: var(--muted); }
+    .bio { margin-top: 22px; font-size: 1rem; color: #344054; }
+    .contact-list { margin-top: 24px; display: flex; flex-wrap: wrap; gap: 12px; }
+    .contact-item {
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #fafbff;
+      color: #344054;
+      font-size: 0.95rem;
+      transition: 0.2s ease;
+    }
+    .contact-item:hover { transform: translateY(-1px); border-color: #cdd5df; color: var(--accent); }
+
+    .section { padding: 20px 0 72px; }
+    .section-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 24px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 28px;
+    }
+    .card h2 { margin-top: 0; margin-bottom: 14px; font-size: 1.35rem; }
+    .card p, .card li { color: #475467; }
+
+    .post-list { display: grid; gap: 14px; margin-top: 16px; }
+    .post-item {
+      padding: 16px 18px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: #fcfcff;
+      transition: 0.2s ease;
+      display: block;
+      cursor: pointer;
+    }
+    .post-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+      border-color: #d0d5dd;
+    }
+    .post-title { font-weight: 600; margin-bottom: 6px; color: #101828; }
+    .post-meta { font-size: 0.9rem; color: var(--muted); }
+
+    .tags { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+    .tag {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: #f2f4f7;
+      color: #344054;
+      font-size: 0.9rem;
+    }
+
+    .article-shell {
+      display: none;
+      padding-bottom: 72px;
+    }
+    .article-shell.active { display: block; }
+    .article-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 34px;
+    }
+    .back-link {
+      display: inline-block;
+      margin-bottom: 18px;
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .article-title { margin: 0 0 8px; font-size: clamp(2rem, 4vw, 2.8rem); }
+    .article-meta { color: var(--muted); margin-bottom: 28px; }
+    .article-content h1,
+    .article-content h2,
+    .article-content h3 { line-height: 1.25; margin-top: 1.8em; }
+    .article-content p,
+    .article-content li { color: #344054; }
+    .article-content img {
+      border-radius: 18px;
+      margin: 20px auto;
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+    }
+    .article-content pre {
+      background: #111827;
+      color: #f9fafb;
+      padding: 16px;
+      border-radius: 16px;
+      overflow: auto;
+    }
+    .article-content code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    .article-content blockquote {
+      margin: 18px 0;
+      padding: 8px 18px;
+      border-left: 4px solid var(--accent);
+      background: #f8fbff;
+      border-radius: 8px;
+      color: #475467;
+    }
+    .math-display {
+      display: flex;
+      justify-content: center;
+      margin: 22px 0;
+    }
+    .math-inline {
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    .notice {
+      margin-top: 16px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      background: #f8fafc;
+      border: 1px dashed #d0d5dd;
+      color: #475467;
+      font-size: 0.95rem;
+    }
+
+    .pdf-controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+      align-items: center;
+    }
+    .pdf-upload-label {
+      display: inline-block;
+      padding: 8px 14px;
+      border-radius: 10px;
+      background: var(--accent);
+      color: #fff;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.92rem;
+    }
+    .pdf-upload-label:hover { filter: brightness(0.96); }
+    .pdf-upload-input {
+      display: none;
+    }
+    .pdf-list { display: grid; gap: 10px; margin-top: 14px; }
+    .pdf-item {
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: #f9fbff;
+      cursor: pointer;
+      transition: 0.2s ease;
+      font-size: 0.95rem;
+    }
+    .pdf-item:hover {
+      background: #f0f4ff;
+      border-color: var(--accent);
+    }
+    .pdf-viewer-container {
+      display: none;
+      padding-bottom: 72px;
+    }
+    .pdf-viewer-container.active {
+      display: block;
+    }
+    .pdf-viewer-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 34px;
+    }
+    .pdf-back-link {
+      display: inline-block;
+      margin-bottom: 18px;
+      color: var(--accent);
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .pdf-viewer-title { margin: 0 0 14px; font-size: 1.6rem; }
+    .pdf-canvas-container {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 600px;
+      overflow-y: auto;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px;
+      background: #fafbff;
+    }
+    .pdf-canvas-page {
+      max-width: 100%;
+      margin: 0 auto;
+    }
+    .pdf-page-nav {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 14px;
+      align-items: center;
+    }
+    .pdf-page-nav button {
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #fff;
+      cursor: pointer;
+      font-size: 0.92rem;
+    }
+    .pdf-page-nav button:hover {
+      background: #f9fbff;
+    }
+    .pdf-page-info {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    footer { padding: 0 0 40px; color: var(--muted); text-align: center; font-size: 0.92rem; }
+
+    @media (max-width: 800px) {
+      .hero-card, .section-grid { grid-template-columns: 1fr; }
+      .hero-card, .article-card { padding: 28px; }
+      .avatar { width: 160px; height: 160px; }
+      .nav-inner { flex-direction: column; gap: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <div class="container nav-inner">
+      <div class="brand">Qixiao Yuan</div>
+      <nav class="nav-links">
+        <a href="#about">About</a>
+        <a href="#posts">Posts</a>
+        <a href="#pdfs">PDFs</a>
+        <a href="#contact">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="homeView">
+    <section class="hero container">
+      <div class="hero-card">
+        <div class="avatar-wrap">
+          <img class="avatar" src="profile.jpg" alt="Qixiao Yuan" />
+        </div>
+        <div>
+          <div class="eyebrow">Personal Blog</div>
+          <h1>Qixiao Yuan</h1>
+          <p class="subtitle">Physics Student · Notes · Research Interests · Personal Writing</p>
+          <p class="bio" id="about">
+            Hi! I'm Qixiao Yuan (袁琦骁). This is my personal homepage and blog.
+          </p>
+          <p>
+            My nickname is Hourqima (猴骑马), which means “monkey riding horse” in Chinese. I prefer to use this name online because it is much easier to remember and pronounce.
+          </p>
+          <div class="contact-list" id="contact">
+            <a class="contact-item" href="mailto:hourqima@gmail.com">hourqima@gmail.com</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section container">
+      <div class="section-grid">
+        <div class="card" id="posts">
+          <h2>Recent Posts</h2>
+          <div class="post-list" id="postList"></div>
+        </div>
+        <div class="card" id="pdfs">
+          <h2>Documents & PDFs</h2>
+          <div class="pdf-list" id="pdfList"></div>
+        </div>
+        <div class="card">
+          <h2>About Me</h2>
+          <p>
+            I am an undergraduate student from the School of the Gifted Young (SCGY) at the University of Science and Technology of China (USTC), and I am expected to graduate in 2027.
+          </p>
+          <p>
+            I am currently focused on condensed matter experiments, especially 2D materials, while also having a strong interest in condensed matter theory, theoretical physics, and mathematical physics.
+          </p>
+          <p>
+            In my free time, I enjoy listening to music and reading poems, books, and comics. My favourite artist is Frank Zappa, and my favourite book is <em>In Search of Lost Time</em>. If you are interested in any of these topics, feel free to reach out.
+          </p>
+          <div class="tags">
+            <span class="tag">Condensed Matter</span>
+            <span class="tag">2D Materials</span>
+            <span class="tag">Theoretical Physics</span>
+            <span class="tag">Mathematical Physics</span>
+            <span class="tag">Personal Blog</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <section class="article-shell container" id="articleView">
+    <div class="article-card">
+      <a class="back-link" href="#">← 返回主页</a>
+      <h1 class="article-title" id="articleTitle">Loading...</h1>
+      <div class="article-meta" id="articleMeta"></div>
+      <article class="article-content" id="articleContent"></article>
+    </div>
+  </section>
+
+  <section class="pdf-viewer-container container" id="pdfViewerContainer">
+    <div class="pdf-viewer-card">
+      <a class="pdf-back-link">← 返回主页</a>
+      <h1 class="pdf-viewer-title" id="pdfTitle">Loading PDF...</h1>
+      <div class="pdf-canvas-container" id="pdfCanvasContainer"></div>
+      <div class="pdf-page-nav">
+        <button id="pdfPrevBtn">← 上一页</button>
+        <span class="pdf-page-info"><span id="pdfCurrentPage">1</span> / <span id="pdfTotalPages">0</span></span>
+        <button id="pdfNextBtn">下一页 →</button>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">© 2026 Qixiao Yuan. All rights reserved.</div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+    let posts = [];
+    let pdfs = [];
+    let currentPdfIndex = 0;
+    let currentPdfDoc = null;
+    let currentPage = 1;
+    let totalPages = 0;
+
+    const postList = document.getElementById('postList');
+    const pdfList = document.getElementById('pdfList');
+    const pdfSection = document.getElementById('pdfs');
+    const pdfViewerContainer = document.getElementById('pdfViewerContainer');
+    const pdfTitle = document.getElementById('pdfTitle');
+    const pdfCanvasContainer = document.getElementById('pdfCanvasContainer');
+    const pdfCurrentPage = document.getElementById('pdfCurrentPage');
+    const pdfTotalPages = document.getElementById('pdfTotalPages');
+    const pdfPrevBtn = document.getElementById('pdfPrevBtn');
+    const pdfNextBtn = document.getElementById('pdfNextBtn');
+    const pdfBackLink = document.querySelector('.pdf-back-link');
+    const homeView = document.getElementById('homeView');
+    const articleView = document.getElementById('articleView');
+    const articleTitle = document.getElementById('articleTitle');
+    const articleMeta = document.getElementById('articleMeta');
+    const articleContent = document.getElementById('articleContent');
+
+    async function fetchPosts() {
+      const response = await fetch('/api/posts');
+      if (!response.ok) {
+        throw new Error('无法读取文章列表');
+      }
+      posts = await response.json();
+    }
+
+    function renderPostList() {
+      if (!posts.length) {
+        postList.innerHTML = '<div class="post-meta">还没有文章，先上传第一篇吧。</div>';
+        return;
+      }
+
+      postList.innerHTML = posts.map(post => `
+        <a class="post-item" href="#post=${post.slug}">
+          <div class="post-title">${post.title}</div>
+          <div class="post-meta">${post.date || ''} · ${(post.tags || []).join(' · ')}</div>
+          <div class="post-meta" style="margin-top: 6px;">${post.summary}</div>
+        </a>
+      `).join('');
+    }
+
+    function parseFrontmatter(text) {
+      const match = text.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+      if (!match) return { meta: {}, content: text };
+      const yaml = match[1];
+      const content = match[2];
+      const meta = {};
+      yaml.split('\n').forEach(line => {
+        const idx = line.indexOf(':');
+        if (idx === -1) return;
+        const key = line.slice(0, idx).trim();
+        let value = line.slice(idx + 1).trim();
+        value = value.replace(/^"|"$/g, '');
+        meta[key] = value;
+      });
+      return { meta, content };
+    }
+
+    function renderMarkdownWithMath(rawMarkdown) {
+      const mathTokens = [];
+
+      const protectedMarkdown = rawMarkdown
+        .replace(/\$\$[\s\S]*?\$\$/g, chunk => {
+          const index = mathTokens.length;
+          mathTokens.push({ tex: chunk.slice(2, -2).trim(), display: true });
+          return `\n\n<div class="math-placeholder math-display" data-math-index="${index}"></div>\n\n`;
+        })
+        .replace(/\$(?!\$)(?:\\.|[^$\\])+\$/g, chunk => {
+          const index = mathTokens.length;
+          mathTokens.push({ tex: chunk.slice(1, -1).trim(), display: false });
+          return `<span class="math-placeholder math-inline" data-math-index="${index}"></span>`;
+        });
+
+      return { html: marked.parse(protectedMarkdown), mathTokens };
+    }
+
+    function renderMathPlaceholders(container, mathTokens) {
+      container.querySelectorAll('[data-math-index]').forEach(node => {
+        const index = Number(node.getAttribute('data-math-index'));
+        const token = mathTokens[index];
+
+        if (!token || !window.katex) return;
+
+        try {
+          katex.render(token.tex, node, {
+            displayMode: token.display,
+            throwOnError: false
+          });
+        } catch (error) {
+          node.textContent = token.tex;
+        }
+      });
+    }
+
+    async function loadPost(slug) {
+      const post = posts.find(p => p.slug === slug);
+      if (!post) {
+        articleTitle.textContent = '文章不存在';
+        articleMeta.textContent = '';
+        articleContent.innerHTML = '<p>没有找到这篇文章。</p>';
+        homeView.style.display = 'none';
+        articleView.classList.add('active');
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/posts/${encodeURIComponent(slug)}/content`);
+        if (!response.ok) throw new Error('Failed to load markdown file');
+        const raw = await response.text();
+        const { meta, content } = parseFrontmatter(raw);
+        articleTitle.textContent = meta.title || post.title;
+        articleMeta.textContent = `${meta.date || post.date} ${meta.tags ? '· ' + meta.tags : ''}`;
+        const rendered = renderMarkdownWithMath(content);
+        articleContent.innerHTML = rendered.html;
+        renderMathPlaceholders(articleContent, rendered.mathTokens);
+
+        pdfViewerContainer.classList.remove('active');
+        homeView.style.display = 'none';
+        articleView.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (error) {
+        articleTitle.textContent = post.title;
+        articleMeta.textContent = post.date;
+        articleContent.innerHTML = `
+          <p>文章文件读取失败。</p>
+          <pre><code>${error.message}</code></pre>
+        `;
+        pdfViewerContainer.classList.remove('active');
+        homeView.style.display = 'none';
+        articleView.classList.add('active');
+      }
+    }
+
+    function showHome() {
+      articleView.classList.remove('active');
+      pdfViewerContainer.classList.remove('active');
+      homeView.style.display = 'block';
+    }
+
+    async function fetchPdfs() {
+      const response = await fetch('/api/pdfs');
+      if (!response.ok) throw new Error('无法读取PDF列表');
+      pdfs = await response.json();
+    }
+
+    function renderPdfList() {
+      if (!pdfs.length) {
+        pdfList.innerHTML = '<div style="color: var(--muted); font-size: 0.9rem;">还没有找到 PDF 文件，请把 .pdf 文件放到 posts/ 文件夹后刷新页面。</div>';
+        pdfSection.style.display = 'block';
+        return;
+      }
+      pdfSection.style.display = 'block';
+      pdfList.innerHTML = pdfs.map((pdf, idx) => `
+        <div class="pdf-item" onclick="openPdf(${idx})">
+          📄 ${pdf.name}
+        </div>
+      `).join('');
+    }
+
+    async function openPdf(index) {
+      currentPdfIndex = index;
+      const pdf = pdfs[index];
+      pdfTitle.textContent = pdf.name;
+      currentPage = 1;
+
+      try {
+        const response = await fetch(`/api/pdfs/${encodeURIComponent(pdf.name)}/content`);
+        if (!response.ok) throw new Error('无法加载PDF');
+        const arrayBuffer = await response.arrayBuffer();
+        currentPdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        totalPages = currentPdfDoc.numPages;
+        pdfTotalPages.textContent = totalPages;
+        
+        homeView.style.display = 'none';
+        articleView.classList.remove('active');
+        pdfViewerContainer.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        await renderPdfPage(currentPage);
+      } catch (error) {
+        pdfTitle.textContent = '加载失败';
+        pdfCanvasContainer.innerHTML = `<p>${error.message}</p>`;
+      }
+    }
+
+    async function renderPdfPage(pageNum) {
+      if (!currentPdfDoc || pageNum < 1 || pageNum > totalPages) return;
+      
+      currentPage = pageNum;
+      pdfCurrentPage.textContent = currentPage;
+
+      const page = await currentPdfDoc.getPage(pageNum);
+      const scale = 1.5;
+      const viewport = page.getViewport({ scale });
+
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      canvas.className = 'pdf-canvas-page';
+
+      await page.render({
+        canvasContext: context,
+        viewport: viewport
+      }).promise;
+
+      pdfCanvasContainer.innerHTML = '';
+      pdfCanvasContainer.appendChild(canvas);
+    }
+
+    function router() {
+      const hash = window.location.hash;
+      if (hash.startsWith('#pdf=')) {
+        const index = parseInt(hash.slice(5));
+        openPdf(index);
+        return;
+      }
+      const match = hash.match(/^#post=(.+)$/);
+      if (match) {
+        loadPost(match[1]);
+      } else {
+        showHome();
+      }
+    }
+
+    async function bootstrap() {
+      try {
+        await fetchPosts();
+        await fetchPdfs();
+        renderPostList();
+        renderPdfList();
+        router();
+      } catch (error) {
+        postList.innerHTML = `<div class="post-meta">${error.message}`;
+      }
+    }
+
+    pdfBackLink.addEventListener('click', () => {
+      window.location.hash = '#';
+      showHome();
+    });
+    pdfPrevBtn.addEventListener('click', () => {
+      if (currentPage > 1) renderPdfPage(currentPage - 1);
+    });
+    pdfNextBtn.addEventListener('click', () => {
+      if (currentPage < totalPages) renderPdfPage(currentPage + 1);
+    });
+
+    window.addEventListener('hashchange', router);
+    window.addEventListener('load', bootstrap);
+  </script>
+</body>
+</html>
