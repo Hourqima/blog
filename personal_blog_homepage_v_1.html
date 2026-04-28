@@ -113,6 +113,22 @@
     .card h2 { margin-top: 0; margin-bottom: 14px; font-size: 1.35rem; }
     .card p, .card li { color: #475467; }
 
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+    .section-head h2 { margin-bottom: 0; }
+    .more-link {
+      color: var(--accent);
+      font-size: 0.95rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .more-link:hover { text-decoration: underline; }
+
     .post-list { display: grid; gap: 14px; margin-top: 16px; }
     .post-item {
       padding: 16px 18px;
@@ -130,6 +146,34 @@
     }
     .post-title { font-weight: 600; margin-bottom: 6px; color: #101828; }
     .post-meta { font-size: 0.9rem; color: var(--muted); }
+    .posts-shell {
+      display: none;
+      padding: 72px 0;
+    }
+    .posts-shell.active { display: block; }
+    .posts-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 34px;
+    }
+    .posts-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+    .posts-header h1 { margin: 0; font-size: clamp(2rem, 4vw, 2.8rem); }
+    .posts-header p { margin: 8px 0 0; color: var(--muted); }
+    .post-list--full { margin-top: 0; }
+    .post-item--full {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
 
     .tags { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
     .tag {
@@ -308,8 +352,10 @@
     @media (max-width: 800px) {
       .hero-card, .section-grid { grid-template-columns: 1fr; }
       .hero-card, .article-card { padding: 28px; }
+      .posts-card { padding: 28px; }
       .avatar { width: 160px; height: 160px; }
       .nav-inner { flex-direction: column; gap: 10px; }
+      .section-head, .posts-header { align-items: flex-start; }
     }
   </style>
 </head>
@@ -349,8 +395,11 @@
 
     <section class="section container">
       <div class="section-grid">
-        <div class="card" id="posts">
-          <h2>Recent Posts</h2>
+        <div class="card" id="recentPosts">
+          <div class="section-head">
+            <h2>Recent Posts</h2>
+            <a class="more-link" href="#posts">更多文章</a>
+          </div>
           <div class="post-list" id="postList"></div>
         </div>
         <div class="card" id="pdfs">
@@ -379,6 +428,19 @@
       </div>
     </section>
   </main>
+
+  <section class="posts-shell container" id="postsView">
+    <div class="posts-card">
+      <div class="posts-header">
+        <div>
+          <a class="back-link" href="#">← 返回主页</a>
+          <h1>All Posts</h1>
+          <p>按上传时间倒序展示全部文章。</p>
+        </div>
+      </div>
+      <div class="post-list post-list--full" id="allPostList"></div>
+    </div>
+  </section>
 
   <section class="article-shell container" id="articleView">
     <div class="article-card">
@@ -418,10 +480,14 @@
     let currentPdfDoc = null;
     let currentPage = 1;
     let totalPages = 0;
+    let currentView = 'home';
 
     const postList = document.getElementById('postList');
+    const allPostList = document.getElementById('allPostList');
     const pdfList = document.getElementById('pdfList');
     const pdfSection = document.getElementById('pdfs');
+    const recentPostsSection = document.getElementById('recentPosts');
+    const postsView = document.getElementById('postsView');
     const pdfViewerContainer = document.getElementById('pdfViewerContainer');
     const pdfTitle = document.getElementById('pdfTitle');
     const pdfCanvasContainer = document.getElementById('pdfCanvasContainer');
@@ -444,19 +510,41 @@
       posts = await response.json();
     }
 
-    function renderPostList() {
-      if (!posts.length) {
-        postList.innerHTML = '<div class="post-meta">还没有文章，先上传第一篇吧。</div>';
+    function formatUploadTime(value) {
+      if (!value) return '';
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return '';
+      return date.toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    function renderPostItems(target, items, showSummary = true) {
+      if (!items.length) {
+        target.innerHTML = '<div class="post-meta">还没有文章，先上传第一篇吧。</div>';
         return;
       }
 
-      postList.innerHTML = posts.map(post => `
-        <a class="post-item" href="#post=${post.slug}">
-          <div class="post-title">${post.title}</div>
-          <div class="post-meta">${post.date || ''} · ${(post.tags || []).join(' · ')}</div>
-          <div class="post-meta" style="margin-top: 6px;">${post.summary}</div>
-        </a>
-      `).join('');
+      target.innerHTML = items.map(post => {
+        const tags = (post.tags || []).join(' · ');
+        const uploadTime = formatUploadTime(post.uploadedAt);
+        return `
+          <a class="post-item ${showSummary ? '' : 'post-item--full'}" href="#post=${post.slug}">
+            <div class="post-title">${post.title}</div>
+            <div class="post-meta">上传时间：${uploadTime || post.date || ''}${tags ? ` · ${tags}` : ''}</div>
+            ${showSummary && post.summary ? `<div class="post-meta" style="margin-top: 6px;">${post.summary}</div>` : ''}
+          </a>
+        `;
+      }).join('');
+    }
+
+    function renderPostList() {
+      renderPostItems(postList, posts.slice(0, 3), true);
+      renderPostItems(allPostList, posts, false);
     }
 
     function parseFrontmatter(text) {
@@ -519,6 +607,7 @@
         articleMeta.textContent = '';
         articleContent.innerHTML = '<p>没有找到这篇文章。</p>';
         homeView.style.display = 'none';
+        postsView.classList.remove('active');
         articleView.classList.add('active');
         return;
       }
@@ -529,32 +618,47 @@
         const raw = await response.text();
         const { meta, content } = parseFrontmatter(raw);
         articleTitle.textContent = meta.title || post.title;
-        articleMeta.textContent = `${meta.date || post.date} ${meta.tags ? '· ' + meta.tags : ''}`;
+        const uploadTime = formatUploadTime(post.uploadedAt);
+        const tagText = meta.tags ? `· ${meta.tags}` : '';
+        articleMeta.textContent = `${uploadTime ? `上传时间：${uploadTime}` : ''}${tagText ? ` ${tagText}` : ''}`.trim();
         const rendered = renderMarkdownWithMath(content);
         articleContent.innerHTML = rendered.html;
         renderMathPlaceholders(articleContent, rendered.mathTokens);
 
         pdfViewerContainer.classList.remove('active');
         homeView.style.display = 'none';
+        postsView.classList.remove('active');
         articleView.classList.add('active');
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } catch (error) {
         articleTitle.textContent = post.title;
-        articleMeta.textContent = post.date;
+        articleMeta.textContent = `上传时间：${formatUploadTime(post.uploadedAt) || post.date || ''}`;
         articleContent.innerHTML = `
           <p>文章文件读取失败。</p>
           <pre><code>${error.message}</code></pre>
         `;
         pdfViewerContainer.classList.remove('active');
         homeView.style.display = 'none';
+        postsView.classList.remove('active');
         articleView.classList.add('active');
       }
     }
 
     function showHome() {
       articleView.classList.remove('active');
+      postsView.classList.remove('active');
       pdfViewerContainer.classList.remove('active');
+      recentPostsSection.style.display = 'block';
       homeView.style.display = 'block';
+      currentView = 'home';
+    }
+
+    function showPostsList() {
+      articleView.classList.remove('active');
+      pdfViewerContainer.classList.remove('active');
+      homeView.style.display = 'none';
+      postsView.classList.add('active');
+      currentView = 'posts';
     }
 
     async function fetchPdfs() {
@@ -593,6 +697,7 @@
         
         homeView.style.display = 'none';
         articleView.classList.remove('active');
+        postsView.classList.remove('active');
         pdfViewerContainer.classList.add('active');
         window.scrollTo({ top: 0, behavior: 'smooth' });
         
@@ -633,6 +738,10 @@
       if (hash.startsWith('#pdf=')) {
         const index = parseInt(hash.slice(5));
         openPdf(index);
+        return;
+      }
+      if (hash === '#posts') {
+        showPostsList();
         return;
       }
       const match = hash.match(/^#post=(.+)$/);

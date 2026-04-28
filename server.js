@@ -86,6 +86,7 @@ async function loadPostsFromFiles() {
         file: `posts/${fileName}`,
         title,
         date,
+        uploadedAt: stats.mtime.toISOString(),
         tags,
         summary,
         mtime: stats.mtime.getTime()
